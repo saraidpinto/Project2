@@ -157,19 +157,32 @@ int doFork(int functionAddr){
 
 }
 
+/*
+It should return -1 to the parent if not successful. If successful, 
+the parent process is replaced with the new program running from its 
+beginning. The way to execute a new process without destroying the 
+current one is to first Fork and then Exec.
+*/
+
 int doExec(char* filename){
 	// use prgtest.cc:Startptocess() as a guide
 
 	// 1. open the file and check validity
+    int readingReg = machine->ReadRegister(4);
+
 	OpenFile *executable = fileSystem->Open(filename);
 	AddrSpace *space;
-
-	if(executable == NULL)
+    printf("Exec Program: [%d] loading [%s]\n", pid, filename);
+	
+    if(executable == NULL)
 		printf("Unable to open file %s\n", filename);
+        machine->WriteRegister(2, 0);
+        incrementPC();
 		return -1;
 	}
 	// 2. create new address space
 	space = new AddrSpace(executable);
+    printf("Attemting new address space creation\n");
 
 	// 3. check if addrspace creation was successful
 	if(space->valid != true) {
@@ -177,15 +190,12 @@ int doExec(char* filename){
 		return -1;
 	}
 
-	// // 4. create new PCB for new address space ... can i reuse existing pcb?
-	// PCB* pcb = pcbManager->AllocatePCB();
-
 	// // initialize parent
-	// pcb ->parent = currentThread->space->pcb->parent;
-	// space->pcb = pcb;
+	pcb ->parent = currentThread->space->pcb->parent;
+	space->pcb = pcb;
 
 	// // 5. set the thread for the new PCB
-	// pcb->thread = currentThread;
+	 pcb->thread = currentThread;
 
 	// 6. delete current address space store old address space somewhere 
 	delete currentThread->space;
