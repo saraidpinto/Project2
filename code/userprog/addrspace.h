@@ -35,6 +35,7 @@ class AddrSpace {
     void RestoreState();		// info on a context switch
     unsigned int GetNumPages(); // get size of addr space
     TranslationEntry* GetPageTable(); // return pageTable
+    unsigned int Translate(unsigned int virtualAddr);
     PCB* pcb; // the process that owns this addresspace
     bool valid; // is AddrSpace valid
 
